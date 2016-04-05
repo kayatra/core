@@ -1,7 +1,7 @@
 package plugin
 
 import(
-  "github.com/home-control/core/transport"
+  "github.com/kayatra/core/transport"
 )
 
 type Plugin struct{

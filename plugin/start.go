@@ -4,7 +4,7 @@ import(
   "os"
   log "github.com/Sirupsen/logrus"
   "github.com/voxelbrain/goptions"
-  "github.com/home-control/core/transport"
+  "github.com/kayatra/core/transport"
 )
 
 type options struct {
