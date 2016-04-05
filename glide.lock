@@ -1,0 +1,14 @@
+hash: 8081b44e5831947f94cd276fa2814236002fbcfff13883dd502d86201748f9ec
+updated: 2016-04-04T22:41:47.080136829+01:00
+imports:
+- name: github.com/gorilla/websocket
+  version: e2e3d8414d0fbae04004f151979f4e27c6747fe7
+- name: github.com/Sirupsen/logrus
+  version: 4b6ea7319e214d98c938f12692336f7ca9348d6b
+- name: github.com/voxelbrain/goptions
+  version: 26cb8b04692384f4dc269de3b5fcf3e2ef78573e
+- name: golang.org/x/sys
+  version: a60af9cbbc6ab800af4f2be864a31f423a0ae1f2
+  subpackages:
+  - unix
+devImports: []

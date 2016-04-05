@@ -1,0 +1,22 @@
+language: go
+
+go:
+  - 1.5
+  - 1.6
+  - tip
+
+install:
+  - go get github.com/Masterminds/glide
+  - ${GOPATH}/bin/glide install
+
+allow_failures:
+  - go: tip
+
+script:
+  - go test -v ./
+  - "GOFMT_FAILS=$(gofmt -l $(find . -path ./vendor -prune -o -name '*.go' -print))"
+  - "echo -e ${GOFMT_FAILS}"
+  - "test $(echo -en \"${GOFMT_FAILS}\" | wc -l) -eq 0"
+
+env:
+  - "GO15VENDOREXPERIMENT=1"
