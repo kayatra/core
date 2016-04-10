@@ -23,10 +23,6 @@ func New(controller string, commandChannel chan Command) (Transport, error){
 
   t.wsUrl = wsUrl.String()
 
-  err = t.establish()
-  if err != nil {
-    return t, err
-  }
-
+  t.establish()
   return t, nil
 }

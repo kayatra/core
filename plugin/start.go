@@ -50,7 +50,6 @@ func (p *Plugin) Start(){
   if err != nil {
     logFields["err"] = err
     log.WithFields(logFields).Error("Could not connect to controller")
-    os.Exit(1)
   }
 
   p.Transport = &t

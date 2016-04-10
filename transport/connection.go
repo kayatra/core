@@ -7,14 +7,9 @@ import(
   "encoding/json"
 )
 
-func (t *Transport) establish() error{
-  err := t.connect()
-  if err != nil {
-    return err
-  }
-
+func (t *Transport) establish(){
+  t.connect()
   go t.ensureConnection()
-  return nil
 }
 
 func (t *Transport) connect() error{
@@ -25,13 +20,19 @@ func (t *Transport) connect() error{
   t.lastPing = time.Now()
   t.pingInterval = time.Minute
   t.hasHelo = false
+  t.connectedAt = time.Now()
 
   c, _, err := websocket.DefaultDialer.Dial(t.wsUrl, nil)
+  t.connection = c
   if err != nil {
+    log.WithFields(log.Fields{
+      "err": err,
+      "socketUrl": t.wsUrl,
+    }).Error("Could not connect to controller")
     return err
   }
 
-  t.connection = c
+  t.connectionMade = true
 
   go t.readCommands()
 
@@ -53,10 +54,14 @@ func (t *Transport) ensureConnection(){
       "pingExpires": pingExpires,
       "connectionFailures": connectionFailures,
       "connectionId": t.connectionId,
+      "connectedAt": t.connectedAt,
     }).Debug("Checking connection")
 
-    if time.Now().After(pingExpires){
-      t.connection.Close()
+    if time.Now().After(pingExpires) || (!t.hasHelo && time.Now().After(t.connectedAt.Add(time.Second*5))){
+      if t.connectionMade{
+        t.connection.Close()
+        t.connectionMade = false
+      }
       t.hasHelo = false
 
       reconnectIn := reconnectPause*time.Duration(connectionFailures)
@@ -81,6 +86,7 @@ func (t *Transport) ensureConnection(){
 
 
 func (t *Transport) readCommands(){
+  log.Debug("Reading commands")
   for{
     msgType, msg, err := t.connection.ReadMessage()
     if err != nil{

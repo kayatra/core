@@ -13,5 +13,7 @@ type Transport struct{
   connectionId    uint64
   lastPing        time.Time
   pingInterval    time.Duration
+  connectedAt     time.Time
+  connectionMade  bool
   disconnectError error
 }
