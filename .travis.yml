@@ -6,7 +6,7 @@ go:
   - tip
 
 install:
-  - "git clone git@github.com:kayatra/helpers.git ${GOPATH}/helpers"
+  - "git clone https://github.com/kayatra/helpers.git ${GOPATH}/helpers"
   - "${GOPATH}/helpers/scripts/glide-setup.sh"
 
 allow_failures:
