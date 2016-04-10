@@ -1,5 +1,5 @@
-hash: 8081b44e5831947f94cd276fa2814236002fbcfff13883dd502d86201748f9ec
-updated: 2016-04-04T22:41:47.080136829+01:00
+hash: 613a4e8d1a1499e1ede56e111f71ba79bb35ab0df06fbd7d5219a538c332abc3
+updated: 2016-04-10T14:57:51.9420009+01:00
 imports:
 - name: github.com/gorilla/websocket
   version: e2e3d8414d0fbae04004f151979f4e27c6747fe7
@@ -11,4 +11,8 @@ imports:
   version: a60af9cbbc6ab800af4f2be864a31f423a0ae1f2
   subpackages:
   - unix
+- name: gopkg.in/airbrake/gobrake.v2
+  version: 31c8ff1fb8b79a6947e6565e9a6df535f98a6b94
+- name: gopkg.in/gemnasium/logrus-airbrake-hook.v2
+  version: 31e6fd4bd5a98d8ee7673d24bc54ec73c31810dd
 devImports: []
