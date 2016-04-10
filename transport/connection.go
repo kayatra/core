@@ -110,18 +110,8 @@ func (t *Transport) readCommands(){
     payload := Command{}
     err = json.Unmarshal(msg, &payload)
     if err == nil{
-      cmdProcessors := map[string]func(*Command){
-        "helo": t.msgHelo,
-      }
-
-      if cmdProcessors[payload.Type] == nil{
-        log.WithFields(log.Fields{
-          "command": payload.Type,
-          "payload": string(msg),
-        }).Error("Could not find processor for command")
-      } else {
-        cmdProcessors[payload.Type](&payload)
-      }
+      payload.Transport = t
+      processCommand(&payload)
     } else {
       log.WithFields(log.Fields{
         "msg": string(msg),
