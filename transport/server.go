@@ -49,13 +49,11 @@ func (c *socketConnection) SendMessage(mt string, b interface{}){
 
   err := c.Connection.WriteJSON(msg)
   if err != nil {
-    log.WithFields(log.Fields{
-      "address": c.Connection.RemoteAddr(),
-      "id": c.ConnectionId,
-      "error": err,
-      "type": mt,
-      "body": b,
-    }).Error("Error sending message to client")
+    f := c.ClientFields()
+    f["error"] = err
+    f["type"] = mt
+    f["body"] = b
+    log.WithFields(f).Error("Error sending message to client")
   }
 }
 
@@ -67,6 +65,10 @@ func ping(c socketConnection, close chan struct{}) {
       case <-ticker.C:
         p := CommandPing{}
         c.SendMessage("ping", p)
+
+        if c.PingExpired(){
+          log.WithFields(c.ClientFields()).Warning("Ping expired for client")
+        }
       case <-close:
         return
     }
@@ -90,10 +92,7 @@ func Server(w http.ResponseWriter, r *http.Request) {
   t.ConnectionId = atomic.AddUint64(&connectionIdCounter, 1)
   c.Transport = &t
 
-  log.WithFields(log.Fields{
-    "address": c.Connection.RemoteAddr(),
-    "id": c.ConnectionId,
-  }).Debug("New socket connection")
+  log.WithFields(t.ClientFields()).Debug("New socket connection")
 
   done := make(chan struct{})
 
@@ -108,23 +107,19 @@ func Server(w http.ResponseWriter, r *http.Request) {
     msgType, msg, err := ws.ReadMessage()
     if err != nil{
       if websocket.IsCloseError(err, websocket.CloseGoingAway, websocket.CloseNormalClosure, websocket.CloseNoStatusReceived) {
-        log.WithFields(log.Fields{
-          "id": c.ConnectionId,
-        }).Debug("Client disconnect")
+        log.WithFields(c.ClientFields()).Debug("Client disconnect")
       } else {
-        log.WithFields(log.Fields{
-          "id": c.ConnectionId,
-          "err": err,
-        }).Error("Error reading message")
+        f := c.ClientFields()
+        f["err"] = err
+        log.WithFields(f).Error("Error reading message")
       }
       break
     }
 
-    log.WithFields(log.Fields{
-      "id": c.ConnectionId,
-      "type": msgType,
-      "msg": msg,
-    }).Debug("Got message from client")
+    f := c.ClientFields()
+    f["msgType"] = msgType
+    f["msg"] = msg
+    log.WithFields(f).Debug("Got message from client")
   }
 
   log.WithFields(log.Fields{

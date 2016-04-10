@@ -47,17 +47,11 @@ func (t *Transport) ensureConnection(){
   tkr := time.NewTicker(time.Second*5)
   for {
     <- tkr.C
-    pingExpires := t.LastPing.Add(t.PingInterval).Add(time.Second*5)
-    log.WithFields(log.Fields{
-      "pingInterval": t.PingInterval,
-      "lastPing": t.LastPing,
-      "pingExpires": pingExpires,
-      "connectionFailures": connectionFailures,
-      "connectionId": t.ConnectionId,
-      "connectedAt": t.ConnectedAt,
-    }).Debug("Checking connection")
+    f := t.ClientFields()
+    f["connectionFailures"] = connectionFailures
+    log.WithFields(f).Debug("Checking connection")
 
-    if time.Now().After(pingExpires) || (!t.hasHelo && time.Now().After(t.ConnectedAt.Add(time.Second*5))){
+    if t.PingExpired(){
       if t.connectionMade{
         t.Connection.Close()
         t.connectionMade = false
