@@ -17,13 +17,13 @@ func (t *Transport) connect() error{
     "wsUrl": t.wsUrl,
   }).Debug("Connecting to transport websocket")
 
-  t.lastPing = time.Now()
-  t.pingInterval = time.Minute
+  t.LastPing = time.Now()
+  t.PingInterval = time.Minute
+  t.ConnectedAt = time.Now()
   t.hasHelo = false
-  t.connectedAt = time.Now()
 
   c, _, err := websocket.DefaultDialer.Dial(t.wsUrl, nil)
-  t.connection = c
+  t.Connection = c
   if err != nil {
     log.WithFields(log.Fields{
       "err": err,
@@ -47,19 +47,19 @@ func (t *Transport) ensureConnection(){
   tkr := time.NewTicker(time.Second*5)
   for {
     <- tkr.C
-    pingExpires := t.lastPing.Add(t.pingInterval).Add(time.Second*5)
+    pingExpires := t.LastPing.Add(t.PingInterval).Add(time.Second*5)
     log.WithFields(log.Fields{
-      "pingInterval": t.pingInterval,
-      "lastPing": t.lastPing,
+      "pingInterval": t.PingInterval,
+      "lastPing": t.LastPing,
       "pingExpires": pingExpires,
       "connectionFailures": connectionFailures,
-      "connectionId": t.connectionId,
-      "connectedAt": t.connectedAt,
+      "connectionId": t.ConnectionId,
+      "connectedAt": t.ConnectedAt,
     }).Debug("Checking connection")
 
-    if time.Now().After(pingExpires) || (!t.hasHelo && time.Now().After(t.connectedAt.Add(time.Second*5))){
+    if time.Now().After(pingExpires) || (!t.hasHelo && time.Now().After(t.ConnectedAt.Add(time.Second*5))){
       if t.connectionMade{
-        t.connection.Close()
+        t.Connection.Close()
         t.connectionMade = false
       }
       t.hasHelo = false
@@ -88,11 +88,11 @@ func (t *Transport) ensureConnection(){
 func (t *Transport) readCommands(){
   log.Debug("Reading commands")
   for{
-    msgType, msg, err := t.connection.ReadMessage()
+    msgType, msg, err := t.Connection.ReadMessage()
     if err != nil{
       if websocket.IsCloseError(err, websocket.CloseGoingAway, websocket.CloseNormalClosure, websocket.CloseNoStatusReceived) {
         log.WithFields(log.Fields{
-          "id": t.connectionId,
+          "id": t.ConnectionId,
         }).Debug("Lost connection to server")
       } else {
         log.WithFields(log.Fields{

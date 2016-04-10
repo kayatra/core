@@ -6,14 +6,15 @@ import(
 )
 
 type Transport struct{
-  connection      *websocket.Conn
+  Connection      *websocket.Conn
+  ConnectionId    uint64
+  LastPing        time.Time
+  PingInterval    time.Duration
+  ConnectedAt     time.Time
+
   wsUrl           string
   hasHelo         bool
   commandChannel  chan Command
-  connectionId    uint64
-  lastPing        time.Time
-  pingInterval    time.Duration
-  connectedAt     time.Time
   connectionMade  bool
   disconnectError error
 }

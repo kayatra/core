@@ -33,6 +33,8 @@ func processCommand(c *Command){
   switch c.Type{
   case "helo":
     m = &CommandHelo{}
+  case "ping":
+    m = &CommandPing{}
   }
 
   err := json.Unmarshal(raw, &m)
@@ -56,12 +58,20 @@ type CommandHelo struct{
 
 func (c CommandHelo) Process(){
   c.Command.Transport.hasHelo = true
-  c.Command.Transport.connectionId = c.ConnectionId
-  c.Command.Transport.pingInterval = time.Duration(c.PingInterval)*time.Second
-  log.Debug(c.PingInterval)
+  c.Command.Transport.ConnectionId = c.ConnectionId
+  c.Command.Transport.PingInterval = time.Duration(c.PingInterval)*time.Second
 
   log.WithFields(log.Fields{
-    "connectionId": c.Command.Transport.connectionId,
-    "pingInterval": c.Command.Transport.pingInterval,
+    "connectionId": c.Command.Transport.ConnectionId,
+    "pingInterval": c.Command.Transport.PingInterval,
   }).Debug("Got helo from controller")
+}
+
+type CommandPing struct{
+  baseCommand
+}
+
+func (c CommandPing) Process(){
+  c.Command.Transport.LastPing = time.Now()
+  log.Debug("Got ping from controller")
 }
